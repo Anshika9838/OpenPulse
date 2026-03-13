@@ -3,6 +3,7 @@ import re
 from datetime import datetime, timedelta
 import dotenv
 import os
+
 dotenv.load_dotenv()
 
 class GitHubDiscovery:
@@ -78,7 +79,7 @@ class GitHubDiscovery:
             "Contributor Count": contributor_count,
             "Social Share Image": f"https://opengraph.githubassets.com/1/{username}/{repo_name}",
             "URL": repo_url,
-            "Demo": data.get("homepage")
+            "Demo": None or data.get("homepage")
         }
 
 # --- Execution ---
