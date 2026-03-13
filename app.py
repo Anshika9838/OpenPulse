@@ -72,6 +72,7 @@ class GitHubDiscovery:
             contributor_count = len(res_json) if isinstance(res_json, list) else 0
 
         return {
+            "id": data.get("id"),
             "Username": username,
             "Repo Name": repo_name,
             "Description": data.get("description"),
@@ -84,7 +85,7 @@ class GitHubDiscovery:
 
 # --- Execution ---
 my_token = os.getenv("GITHUB_TOKEN")
-github = GitHubDiscovery()
+github = GitHubDiscovery(token=my_token)
 
 trending_url = github.get_trending_repo_url(days_back=3)
 
