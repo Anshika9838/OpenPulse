@@ -1,0 +1,48 @@
+.nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.5rem 0 env(safe-area-inset-bottom);
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 0.4rem 1rem;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    transition: color 0.2s ease, background 0.2s ease;
+    text-decoration: none;
+}
+
+.item:hover {
+    color: var(--text-primary);
+}
+
+.active {
+    color: var(--text-primary);
+}
+
+.label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* On desktop, hide bottom nav and use sidebar instead */
+@media (min-width: 768px) {
+    .nav {
+        display: none;
+    }
+}

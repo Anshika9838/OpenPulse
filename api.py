@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import requests
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import dotenv
 
@@ -56,42 +56,160 @@ class GitHubDiscovery:
             
         return None
 
-    def get_repo_details(self, repo_url):
-        """Parses the repo and gets the contributor count + metadata."""
-        match = re.search(r"github\.com/([^/]+)/([^/]+)", repo_url)
-        if not match: return {"error": "Invalid URL"}
-
-        username, repo_name = match.groups()
-        repo_name = repo_name.replace(".git", "")
-        api_url = f"{self.base_url}/repos/{username}/{repo_name}"
-
-        # 1. Main Data
-        res = requests.get(api_url, headers=self.headers)
-        if res.status_code != 200: return {"error": f"API Fail: {res.status_code}"}
-        data = res.json()
-
-        # 2. Contributor Count (Pagination Trick)
-        c_url = f"{api_url}/contributors?per_page=1&anon=1"
-        c_res = requests.get(c_url, headers=self.headers)
-        
-        if "Link" in c_res.headers:
-            last_page = re.search(r'page=(\d+)>; rel="last"', c_res.headers["Link"])
-            contributor_count = int(last_page.group(1)) if last_page else 0
-        else:
-            res_json = c_res.json()
-            contributor_count = len(res_json) if isinstance(res_json, list) else 0
-
-        return {
-            "id": data.get("id"),  # Add ID for commenting
-            "Username": username,
-            "Repo Name": repo_name,
-            "Description": data.get("description"),
-            "Stars": data.get("stargazers_count"),
-            "Contributor Count": contributor_count,
-            "Social Share Image": f"https://opengraph.githubassets.com/1/{username}/{repo_name}",
-            "URL": repo_url,
-            "Demo": None or data.get("homepage")
+    def get_trending_repos(self, count: int = 10, days_back: int = 1):
+        """Returns a list of top repos (by stars) created within the last N days."""
+        date_limit = (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+        search_url = f"{self.base_url}/search/repositories"
+        query_params = {
+            'q': f'created:>{date_limit}',
+            'sort': 'stars',
+            'order': 'desc',
+            'per_page': count
         }
+        
+        response = requests.get(search_url, headers=self.headers, params=query_params)
+        if response.status_code != 200:
+            return []
+
+        data = response.json()
+        items = data.get('items', [])
+        if not items and days_back < 30:
+            # Expand the search window if nothing is found
+            return self.get_trending_repos(count=count, days_back=30)
+
+        repos = []
+        for item in items:
+            html_url = item.get('html_url')
+            if not html_url:
+                continue
+            details = {
+                "id": item.get("id"),
+                "Username": (item.get("owner") or {}).get("login"),
+                "Repo Name": item.get("name"),
+                "Full Name": item.get("full_name"),
+                "Description": item.get("description"),
+                "Stars": item.get("stargazers_count"),
+                "Forks": item.get("forks_count"),
+                "Contributor Count": None,
+                "Owner Avatar": (item.get("owner") or {}).get("avatar_url"),
+                "Social Share Image": f"https://opengraph.githubassets.com/1/{(item.get('owner') or {}).get('login')}/{item.get('name')}",
+                "URL": html_url,
+                "Demo": None or item.get("homepage"),
+            }
+            repos.append(details)
+
+        return repos
+
+    def get_popular_repos_latest_releases(
+        self,
+        n: int = 10,
+        release_days_back: int = 30,
+        min_stars: int = 50,
+        per_page: int = 50,
+        max_pages: int = 10,
+    ):
+        now_utc = datetime.now(timezone.utc)
+        cutoff = now_utc - timedelta(days=release_days_back)
+
+        search_url = f"{self.base_url}/search/repositories"
+        results = []
+
+        for page in range(1, max_pages + 1):
+            query_params = {
+                'q': f'stars:>={min_stars} archived:false',
+                'sort': 'stars',
+                'order': 'desc',
+                'per_page': per_page,
+                'page': page,
+            }
+
+            response = requests.get(search_url, headers=self.headers, params=query_params)
+            if response.status_code in (401, 403):
+                try:
+                    payload = response.json()
+                except Exception:
+                    payload = {}
+                message = payload.get('message') or f"GitHub API returned {response.status_code}"
+                reset = response.headers.get('X-RateLimit-Reset')
+                if reset and 'rate limit' in message.lower():
+                    try:
+                        reset_dt = datetime.fromtimestamp(int(reset), tz=timezone.utc)
+                        message = f"{message} (resets at {reset_dt.isoformat()})"
+                    except Exception:
+                        pass
+                raise RuntimeError(message)
+            if response.status_code != 200:
+                break
+
+            data = response.json()
+            items = data.get('items', [])
+            if not items:
+                break
+
+            for item in items:
+                full_name = item.get('full_name')
+                html_url = item.get('html_url')
+                if not full_name or not html_url:
+                    continue
+
+                latest_release_url = f"{self.base_url}/repos/{full_name}/releases/latest"
+                r = requests.get(latest_release_url, headers=self.headers)
+                if r.status_code == 404:
+                    continue
+                if r.status_code in (401, 403):
+                    try:
+                        payload = r.json()
+                    except Exception:
+                        payload = {}
+                    message = payload.get('message') or f"GitHub API returned {r.status_code}"
+                    reset = r.headers.get('X-RateLimit-Reset')
+                    if reset and 'rate limit' in message.lower():
+                        try:
+                            reset_dt = datetime.fromtimestamp(int(reset), tz=timezone.utc)
+                            message = f"{message} (resets at {reset_dt.isoformat()})"
+                        except Exception:
+                            pass
+                    raise RuntimeError(message)
+                if r.status_code != 200:
+                    continue
+
+                release = r.json()
+                published_at = release.get('published_at')
+                if not published_at:
+                    continue
+
+                try:
+                    published_dt = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+                except Exception:
+                    continue
+
+                if published_dt < cutoff:
+                    continue
+
+                details = {
+                    "id": item.get("id"),
+                    "Username": (item.get("owner") or {}).get("login"),
+                    "Repo Name": item.get("name"),
+                    "Full Name": item.get("full_name"),
+                    "Description": item.get("description"),
+                    "Stars": item.get("stargazers_count"),
+                    "Forks": item.get("forks_count"),
+                    "Contributor Count": None,
+                    "Owner Avatar": (item.get("owner") or {}).get("avatar_url"),
+                    "Social Share Image": f"https://opengraph.githubassets.com/1/{(item.get('owner') or {}).get('login')}/{item.get('name')}",
+                    "URL": html_url,
+                    "Demo": None or item.get("homepage"),
+                }
+
+                details["Latest Release"] = {
+                    "Name": release.get("name"),
+                    "Tag": release.get("tag_name"),
+                    "Published At": published_at,
+                    "URL": release.get("html_url"),
+                }
+                results.append(details)
+
+        return results
 
 # Pydantic models
 class CommentCreate(BaseModel):
@@ -108,7 +226,7 @@ class CommentResponse(BaseModel):
     created_at: str
     replies: List['CommentResponse'] = []
 
-CommentResponse.update_forward_refs()
+CommentResponse.model_rebuild()
 
 # Database functions
 def get_db_connection():
@@ -164,16 +282,31 @@ def get_comments_for_entity(entity_id: str):
 # API Routes
 @app.get("/trending-repo")
 def get_trending_repo():
-    """Get details of the trending GitHub repository."""
+    """Get details of the top trending GitHub repositories."""
     token = os.getenv("GITHUB_TOKEN")
     github = GitHubDiscovery(token)
-    url = github.get_trending_repo_url(days_back=3)
-    if not url:
-        raise HTTPException(status_code=404, detail="No trending repo found")
-    details = github.get_repo_details(url)
-    if "error" in details:
-        raise HTTPException(status_code=500, detail=details["error"])
-    return details
+    repos = github.get_trending_repos(count=10, days_back=3)
+    if not repos:
+        raise HTTPException(status_code=404, detail="No trending repos found")
+    return repos
+
+@app.get("/popular-latest-releases")
+def get_popular_latest_releases(n: int = 10, release_days_back: int = 30, min_stars: int = 50):
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        raise HTTPException(status_code=400, detail="Missing GITHUB_TOKEN. Set it in your environment to avoid GitHub API rate limits.")
+    github = GitHubDiscovery(token)
+    try:
+        repos = github.get_popular_repos_latest_releases(
+            n=n,
+            release_days_back=release_days_back,
+            min_stars=min_stars,
+        )
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    if not repos:
+        raise HTTPException(status_code=404, detail="No repos with recent releases found")
+    return repos
 
 @app.post("/comment", response_model=dict)
 def create_comment(comment: CommentCreate):

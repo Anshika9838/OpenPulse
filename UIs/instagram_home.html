@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Trending GitHub Repos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .card {
+            border-radius: 1rem;
+        }
+
+        .card img {
+            border-radius: 1rem;
+        }
+    </style>
+</head>
+
+<body class="text-slate-900 dark:text-slate-100">
+    <div class="max-w-3xl mx-auto py-8 px-4">
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-4xl text-indigo-600">grid_view</span>
+                <div>
+                    <h1 class="text-2xl font-semibold">Trending GitHub repos</h1>
+                    <p class="text-sm text-slate-600 dark:text-slate-300">The top 10 repos created recently, ranked by stars.</p>
+                </div>
+            </div>
+            <button id="refresh-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
+                <span class="material-symbols-outlined">refresh</span>
+                Refresh
+            </button>
+        </header>
+
+        <div id="status" class="text-sm text-slate-600 dark:text-slate-300 mb-4">Loading trending repos…</div>
+        <div id="feed" class="space-y-6"></div>
+    </div>
+
+    <template id="repo-card-template">
+        <article class="card bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-800 bg-cover bg-center" data-role="avatar"></div>
+                    <div class="min-w-0">
+                        <a class="block font-semibold text-sm text-slate-900 dark:text-slate-100 truncate" href="#" data-role="repo-link" target="_blank" rel="noopener noreferrer"></a>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" data-role="owner"></p>
+                    </div>
+                </div>
+                <a class="text-slate-400 hover:text-indigo-600" href="#" data-role="open-link" target="_blank" rel="noopener noreferrer">
+                    <span class="material-symbols-outlined">open_in_new</span>
+                </a>
+            </div>
+            <div class="h-56 bg-slate-200 dark:bg-slate-800 bg-cover bg-center" data-role="image"></div>
+            <div class="px-4 py-3 space-y-2">
+                <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-300" data-role="stats">
+                    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-base">star</span><span data-role="stars">0</span></span>
+                    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-base">call_split</span><span data-role="forks">0</span></span>
+                    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-base">groups</span><span data-role="contributors">0</span></span>
+                </div>
+                <p class="text-sm text-slate-800 dark:text-slate-200" data-role="description"></p>
+                <p class="text-xs text-slate-500 dark:text-slate-400" data-role="meta"></p>
+            </div>
+        </article>
+    </template>
+
+    <script>
+        async function fetchTrendingRepos() {
+            try {
+                const resp = await fetch('/trending-repo');
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}`);
+                }
+                return await resp.json();
+            } catch (err) {
+                console.error('Failed to load trending repos', err);
+                return null;
+            }
+        }
+
+        function formatNumber(num) {
+            return typeof num === 'number' ? num.toLocaleString() : num;
+        }
+
+        function renderRepos(repos) {
+            const feed = document.getElementById('feed');
+            const status = document.getElementById('status');
+            feed.innerHTML = '';
+
+            if (!repos || !Array.isArray(repos) || repos.length === 0) {
+                status.textContent = 'No trending repos found at the moment.';
+                return;
+            }
+
+            status.textContent = `Showing top ${repos.length} trending repositories`;
+
+            const template = document.getElementById('repo-card-template');
+            repos.forEach((repo) => {
+                const node = template.content.firstElementChild.cloneNode(true);
+
+                const avatar = node.querySelector('[data-role="avatar"]');
+                const repoLink = node.querySelector('[data-role="repo-link"]');
+                const owner = node.querySelector('[data-role="owner"]');
+                const openLink = node.querySelector('[data-role="open-link"]');
+                const image = node.querySelector('[data-role="image"]');
+                const stars = node.querySelector('[data-role="stars"]');
+                const forks = node.querySelector('[data-role="forks"]');
+                const contributors = node.querySelector('[data-role="contributors"]');
+                const description = node.querySelector('[data-role="description"]');
+                const meta = node.querySelector('[data-role="meta"]');
+
+                const fullname = repo['Full Name'] || `${repo.Username}/${repo['Repo Name']}`;
+                const repoUrl = repo.URL || '#';
+
+                if (avatar && repo['Owner Avatar']) {
+                    avatar.style.backgroundImage = `url('${repo['Owner Avatar']}')`;
+                }
+                if (repoLink) {
+                    repoLink.textContent = fullname;
+                    repoLink.href = repoUrl;
+                }
+                if (owner) owner.textContent = repo.Description || '';
+                if (openLink) openLink.href = repoUrl;
+                if (image && repo['Social Share Image']) {
+                    image.style.backgroundImage = `url('${repo['Social Share Image']}')`;
+                }
+                if (stars) stars.textContent = formatNumber(repo.Stars ?? 0);
+                if (forks) forks.textContent = formatNumber(repo.Forks ?? 0);
+                if (contributors) contributors.textContent = formatNumber(repo['Contributor Count'] ?? 0);
+                if (description) description.textContent = repo.Description || 'No description available.';
+                if (meta) meta.textContent = `Trending now · ${fullname}`;
+
+                feed.appendChild(node);
+            });
+        }
+
+        async function init() {
+            const refresh = document.getElementById('refresh-btn');
+            refresh.addEventListener('click', async () => {
+                document.getElementById('status').textContent = 'Refreshing…';
+                const repos = await fetchTrendingRepos();
+                renderRepos(repos);
+            });
+
+            const repos = await fetchTrendingRepos();
+            renderRepos(repos);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

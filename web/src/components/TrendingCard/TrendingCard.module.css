@@ -1,0 +1,105 @@
+.card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.ogImage {
+    position: relative;
+    width: 100%;
+    height: 140px;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, var(--bg-secondary) 100%);
+}
+
+.content {
+    padding: 1rem 1.125rem 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.authorRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.ownerAvatar {
+    border-radius: 50%;
+}
+
+.ownerName {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.language {
+    margin-left: auto;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+    color: #000;
+}
+
+.repoName {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.description {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.stats {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.viewBtn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.viewBtn:hover {
+    opacity: 0.75;
+}
