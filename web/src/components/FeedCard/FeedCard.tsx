@@ -15,7 +15,7 @@ interface FeedCardProps {
     title?: string | null;
     description?: string | null;
     url?: string | null;
-    tags?: string[];
+    tags?: string;
     type: "REPOSITORY" | "PITCH";
     author: Author;
     starsCount: number;
@@ -59,11 +59,11 @@ export default function FeedCard({
             <div className={styles.body}>
                 {title && <h2 className={styles.title}>{title}</h2>}
                 {description && <p className={styles.description}>{description}</p>}
-                {tags && tags.length > 0 && (
+                {tags && (
                     <div className={styles.tags}>
-                        {tags.map((tag) => (
-                            <span key={tag} className={styles.tag}>
-                                <Tag size={11} /> {tag}
+                        {tags.split(",").map((tag) => (
+                            <span key={tag.trim()} className={styles.tag}>
+                                <Tag size={11} /> {tag.trim()}
                             </span>
                         ))}
                     </div>

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
             description,
             url,
             mediaUrl,
-            tags: tags || [],
+            tags: Array.isArray(tags) ? tags.join(",") : (tags || ""),
             type: type || "REPOSITORY",
             authorId: session.user.id,
         },

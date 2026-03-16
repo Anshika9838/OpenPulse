@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // NextAuth Models required for GitHub Auth
@@ -17,12 +17,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -44,7 +44,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  bio           String?   @db.Text
+  bio           String?  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -69,19 +69,20 @@ model VerificationToken {
 }
 
 // App Models
-enum PostType {
-  REPOSITORY
-  PITCH
-}
+// SQLite fallback: enums not supported, using String
+// enum PostType {
+//   REPOSITORY
+//   PITCH
+// }
 
 model Post {
   id          String   @id @default(cuid())
   title       String?  // Optional for pitches, often the repo name for repos
-  description String?  @db.Text
+  description String? 
   url         String?  // GitHub URL or general link
   mediaUrl    String?  // Cloudinary video/image URL for pitches
-  tags        String[] // E.g., ["React", "TypeScript"]
-  type        PostType @default(REPOSITORY)
+  tags        String // SQLite fallback: String[] not supported, using comma-separated String
+  type        String @default("REPOSITORY") // SQLite fallback: enum replaced with String
   
   authorId    String
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -95,7 +96,7 @@ model Post {
 
 model Comment {
   id          String   @id @default(cuid())
-  content     String   @db.Text
+  content     String  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -137,7 +138,7 @@ model Follow {
 
 model Message {
   id         String   @id @default(cuid())
-  content    String   @db.Text
+  content    String  
   createdAt  DateTime @default(now())
   read       Boolean  @default(false)
 

@@ -9,7 +9,7 @@ import styles from "./page.module.css";
 
 type Post = {
   id: string; title?: string; description?: string; url?: string;
-  tags?: string[]; type: "REPOSITORY" | "PITCH"; createdAt: string;
+  tags?: string; type: "REPOSITORY" | "PITCH"; createdAt: string;
   author: { id: string; name: string | null; image: string | null };
   _count: { stars: number; comments: number };
 };
