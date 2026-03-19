@@ -30,7 +30,14 @@ export default function TrendingCard({ fullName, description, url, stars, forks,
     return (
         <article className={styles.card}>
             <div className={styles.ogImage}>
-                <Image src={ogImage} alt={fullName} fill style={{ objectFit: "cover" }} sizes="(max-width: 600px) 100vw, 600px" />
+                <Image
+                    src={ogImage}
+                    alt={fullName}
+                    width={600}
+                    height={360}
+                    style={{ width: "100%", height: "auto", objectFit: "contain", objectPosition: "center" }}
+                    sizes="(max-width: 600px) 100vw, 600px"
+                />
                 <div className={styles.overlay} />
             </div>
             <div className={styles.content}>

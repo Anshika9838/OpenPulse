@@ -1,25 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
-  /* Colors - Dark Mode Premium Aesthetic (OpenPulse) */
-  --bg-primary: #050505;
-  --bg-secondary: #0f0f0f;
-  --bg-tertiary: #161618;
+:root,
+[data-theme='dark'] {
+  /* Colors - Dark Mode Vibrant (OpenPulse) */
+  --bg-primary: #0a0e27;
+  --bg-secondary: #111b3d;
+  --bg-tertiary: #1a2850;
+  --bg-hover: #222f5a;
 
   --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-secondary: #b0b8d4;
+  --text-muted: #7a8199;
 
-  --accent-primary: #6366f1; /* Indigo */
+  --accent-primary: #6366f1; /* Vibrant Indigo */
   --accent-secondary: #a855f7; /* Purple */
   --accent-tertiary: #ec4899; /* Pink */
+  --accent-success: #10b981; /* Green */
+  --accent-warning: #f59e0b; /* Orange */
   
-  --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  --hero-gradient: linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, rgba(5, 5, 5, 0) 100%);
+  --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+  --accent-gradient-alt: linear-gradient(135deg, #ec4899, #f59e0b);
+  --hero-gradient: linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, rgba(10, 14, 39, 0) 100%);
 
   --border-color: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --border-color-hover: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
 
   /* Spacing */
   --space-1: 0.25rem;
@@ -49,10 +59,45 @@
   --transition-fast: 0.15s var(--ease-out);
 }
 
+/* Light Mode Theme - Enhanced */
+[data-theme='light'] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fc;
+  --bg-tertiary: #f0f2f9;
+  --bg-hover: #e8eaf7;
+
+  --text-primary: #0f1419;
+  --text-secondary: #555f7e;
+  --text-muted: #8892b0;
+
+  --accent-primary: #6366f1;
+  --accent-secondary: #7c3aed;
+  --accent-tertiary: #db2777;
+  --accent-success: #059669;
+  --accent-warning: #d97706;
+
+  --accent-gradient: linear-gradient(135deg, #6366f1, #7c3aed);
+  --accent-gradient-alt: linear-gradient(135deg, #db2777, #d97706);
+  --hero-gradient: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+
+  --border-color: rgba(99, 102, 241, 0.12);
+  --border-color-hover: rgba(99, 102, 241, 0.2);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(99, 102, 241, 0.15);
+
+  --shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.08);
+  --shadow-md: 0 4px 16px rgba(99, 102, 241, 0.12);
+  --shadow-lg: 0 8px 32px rgba(99, 102, 241, 0.15);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -64,6 +109,7 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-medium), color var(--transition-medium);
 }
 
 a {
@@ -78,7 +124,6 @@ button {
   font-family: inherit;
 }
 
-
 /* Utilities */
 .glass-panel {
   background: var(--glass-bg);
@@ -86,12 +131,13 @@ button {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  transition: border-color var(--transition-medium), background var(--transition-medium);
+  transition: border-color var(--transition-medium), background var(--transition-medium), box-shadow var(--transition-medium);
 }
 
 .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-color-hover);
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-md);
 }
 
 .text-gradient {
@@ -111,8 +157,11 @@ button {
   transition: transform var(--transition-fast), opacity var(--transition-fast), box-shadow var(--transition-fast);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -131,12 +180,37 @@ button {
   transition: all var(--transition-fast);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  cursor: pointer;
 }
 
 .btn-secondary:hover {
-  background: var(--border-color);
+  background: var(--bg-hover);
+  border-color: var(--accent-primary);
   transform: translateY(-2px);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn-icon:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 /* Animations */
@@ -148,6 +222,37 @@ button {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s var(--ease-out);
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s var(--ease-out);
+}
+
+.animate-slide-down {
+  animation: slideDown 0.5s var(--ease-out);
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -181,14 +286,16 @@ button {
   min-height: 100vh;
   padding-bottom: 70px;
   /* space for mobile bottom nav */
+  background: var(--bg-primary);
 }
 
 @media (min-width: 768px) {
   .mainContent {
     padding-bottom: 0;
-    max-width: 680px;
-    padding-top: 1rem;
+    max-width: 900px;
+    padding-top: 0;
     margin: 0 auto;
+    width: 100%;
   }
 }
 

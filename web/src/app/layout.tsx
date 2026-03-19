@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import SessionWrapper from "@/components/SessionWrapper";
 
 export const metadata: Metadata = {
@@ -9,18 +10,20 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#0a0e27",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <SessionWrapper>
-          {children}
-        </SessionWrapper>
+        <ThemeProvider>
+          <SessionWrapper>
+            {children}
+          </SessionWrapper>
+        </ThemeProvider>
       </body>
     </html>
   );
