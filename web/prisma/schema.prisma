@@ -148,3 +148,24 @@ model Message {
   sender     User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver   User     @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
 }
+
+model TrendingRepo {
+  id          Int      @id
+  name        String
+  fullName    String   @unique
+  description String?
+  url         String
+  stars       Int
+  forks       Int
+  language    String?
+  ownerLogin  String
+  ownerAvatar String
+  ogImage     String?
+  fetchedAt   DateTime
+  updatedAt   DateTime @updatedAt
+}
+
+model TrendingMeta {
+  id          Int      @id @default(1)
+  lastFetched DateTime
+}

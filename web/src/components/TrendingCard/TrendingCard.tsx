@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import React from "react";
 import { Star, GitFork, ExternalLink } from "lucide-react";
 import styles from "./TrendingCard.module.css";
 
@@ -17,7 +18,7 @@ interface TrendingCardProps {
     forks: number;
     language?: string | null;
     owner: TrendingOwner;
-    ogImage: string;
+    ogImage?: string | null;
 }
 
 const langColors: Record<string, string> = {
@@ -27,19 +28,24 @@ const langColors: Record<string, string> = {
 };
 
 export default function TrendingCard({ fullName, description, url, stars, forks, language, owner, ogImage }: TrendingCardProps) {
+    const [showImage, setShowImage] = React.useState(Boolean(ogImage));
     return (
         <article className={styles.card}>
-            <div className={styles.ogImage}>
-                <Image
-                    src={ogImage}
-                    alt={fullName}
-                    width={600}
-                    height={360}
-                    style={{ width: "100%", height: "auto", objectFit: "contain", objectPosition: "center" }}
-                    sizes="(max-width: 600px) 100vw, 600px"
-                />
-                <div className={styles.overlay} />
-            </div>
+            {showImage && ogImage && (
+                <div className={styles.ogImage}>
+                    <Image
+                        src={ogImage}
+                        alt={fullName}
+                        width={600}
+                        height={360}
+                        unoptimized
+                        onError={() => setShowImage(false)}
+                        style={{ width: "100%", height: "auto", objectFit: "contain", objectPosition: "center" }}
+                        sizes="(max-width: 600px) 100vw, 600px"
+                    />
+                    <div className={styles.overlay} />
+                </div>
+            )}
             <div className={styles.content}>
                 <div className={styles.authorRow}>
                     <Image src={owner.avatar} alt={owner.login} width={22} height={22} className={styles.ownerAvatar} />
