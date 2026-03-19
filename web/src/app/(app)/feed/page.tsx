@@ -28,10 +28,28 @@ export default function HomePage() {
   useEffect(() => {
     if (tab === "trending") {
       setLoading(true);
-      fetch("/api/trending").then(r => r.json()).then(d => { setTrending(d); setLoading(false); });
+      fetch("/api/trending")
+        .then(r => r.json())
+        .then(d => { 
+          setTrending(Array.isArray(d) ? d : []);
+          setLoading(false);
+        })
+        .catch(() => {
+          setTrending([]);
+          setLoading(false);
+        });
     } else {
       setLoading(true);
-      fetch("/api/posts?type=REPOSITORY").then(r => r.json()).then(d => { setPosts(d); setLoading(false); });
+      fetch("/api/posts?type=REPOSITORY")
+        .then(r => r.json())
+        .then(d => { 
+          setPosts(Array.isArray(d) ? d : []);
+          setLoading(false);
+        })
+        .catch(() => {
+          setPosts([]);
+          setLoading(false);
+        });
     }
   }, [tab]);
 
@@ -51,7 +69,7 @@ export default function HomePage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.title}>
-          <span className="text-gradient">DevPulse</span>
+          <span className="text-gradient">OpenPulse</span>
         </div>
         {session && (
           <Link href="/post/new" className={styles.newPostBtn}>

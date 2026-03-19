@@ -6,25 +6,26 @@
     .sidebar {
         display: flex;
         flex-direction: column;
-        width: 240px;
+        width: 260px;
         min-height: 100vh;
-        padding: 1.5rem 1rem;
+        padding: var(--space-8) var(--space-4);
         position: sticky;
         top: 0;
         border-right: 1px solid var(--border-color);
-        gap: 2rem;
+        gap: var(--space-8);
+        background: var(--bg-primary);
     }
 }
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 1.3rem;
-    font-weight: 700;
+    gap: var(--space-3);
+    font-size: 1.5rem;
+    font-weight: 800;
     color: var(--text-primary);
     text-decoration: none;
-    padding: 0 0.5rem;
+    padding: 0 var(--space-3);
 }
 
 .logo svg {
@@ -34,28 +35,34 @@
 .nav {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-2);
 }
 
 .item {
     display: flex;
     align-items: center;
-    gap: 0.875rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-lg);
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xl);
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: all var(--transition-medium);
 }
 
 .item:hover {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     color: var(--text-primary);
+    transform: translateX(4px);
 }
 
 .active {
     color: var(--text-primary);
     background: var(--bg-tertiary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.active svg {
+    color: var(--accent-primary);
 }

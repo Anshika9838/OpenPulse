@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import SessionWrapper from "@/components/SessionWrapper";
+import "../globals.css";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import BottomNav from "@/components/BottomNav/BottomNav";
 
 export const metadata: Metadata = {
   title: { default: "OpenPulse", template: "%s | OpenPulse" },
-  description: "A developer-oriented social media platform by Team Paradox. Explore projects, chat, and connect.",
+  description: "The social platform for developers to share, connect, and grow.",
   manifest: "/manifest.json",
 };
 
@@ -16,12 +17,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <SessionWrapper>
-          {children}
-        </SessionWrapper>
-      </body>
-    </html>
+    <div className="appShell">
+      <Sidebar />
+      <main className="mainContent">
+        {children}
+      </main>
+      <BottomNav />
+    </div>
   );
 }

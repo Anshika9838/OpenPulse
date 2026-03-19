@@ -18,7 +18,7 @@ export default function Sidebar() {
         <aside className={styles.sidebar}>
             <Link href="/" className={styles.logo}>
                 <Code2 size={28} />
-                <span>DevPulse</span>
+                <span>OpenPulse</span>
             </Link>
             <nav className={styles.nav}>
                 {navItems.map(({ href, icon: Icon, label }) => {
